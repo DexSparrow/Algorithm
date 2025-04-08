@@ -3,44 +3,92 @@
 using namespace std;
 
 
-void matrixRotation(vector<vector<int>> matrix, int rotate) {
+
+// we have two options for serializing
+/*
+    Option 1:
+    We will use pointer and for each layer we build one vector that group the concerned element (rectangular)
+    Option 2:
+    We use vector traveling like ({0,0}, {0,1} , {0,9}) => (a, b, c)
+    the a is starting point and c is the destination , to readch c we will increment a with b (I think it's about translating as I remember from the lesson in the high school xD)
+*/
+
+
+void shift(vector <int*> & v,int s,int dir = 1){ // I used this function that I take from the shiftVector.cpp I coded xD. By the way I coded the shift first because I thiought about serizlizing that is my main approach
+    int len = v.size();
+    s = s%len;
+    int sens = (s>int(len/2)? -1 : 1); // invert the direction or not
+    if(sens<0){
+        s = len-1-s;
+    }
+    dir *= sens;
+    vector <int> brouillon(s); // for storing variable that will be used for allocating and so we can move with iteration
+    if(dir<0){
+        for(int i = 0;i < s;i++){
+            brouillon[i]=*(v[i]);
+        }
+        for(int i = 0; i < len-s;i++){
+            *(v[i]) = *(v[s+i]);
+        }
+        for(int i = 0;i < s;i++){
+            *(v[len-s+i])=brouillon[i];
+        }
+    }
+    else{
+        for(int i = 0;i < s;i++){
+            brouillon[i]=*(v[(len-s)+i]);
+        }
+        for(int i = 0;i < len-s;i++){
+            *(v[len-1-i])=*(v[len-1-s-i]);
+        }
+        for(int i = 0; i < s;i++){
+            *(v[i]) = brouillon[i];
+        }
+    }
+
+}
+
+
+void matrixRotation(vector<vector<int>>& matrix, int rotate) {
     int width,height;
-    // min of width and height will be even
+    // {Subject}: min of width and height will be even
     height = matrix.size();
     width = matrix[0].size();
-    cout << height << " " << width;
+    int ww = width;// save for width
+    int hh = height;// save for height
     int minSide = min(height, width);
     int maxSide = height+width - minSide;
     int layer = minSide/2;
-    for(int l =0; l < layer;l++){
+    for(int l =0; l < layer;l++){ // layer traversal
+        vector <int*> serialize;
         minSide -= 2*l;
         maxSide -= 2*l;
         int perimeter = (minSide + maxSide)*2 - 4;
         int order[2] = {width,height};
         int o = 0;
         int r = rotate%(perimeter);
-        vector <int* > serialize;
-        serialize.push_back(&matrix[1][0]);
-        vector< vector<int>>::iterator matri = begin(matrix);
-        cout <<"pointer = "<<matri[1][0]<<endl;
-        cout << *(serialize[0]+1)<<endl;
-        for(int index = 0; index < perimeter; index++){
-            if(index && index%order[o]){
-                o = (o==1?0:1);
-            }
+        for(int x = 0; x < width-1 ; x++){
+            serialize.push_back(&(matrix[l][x+l]));
         }
-        for(int side = 0; side < 4; side++){
-            if(side%2){
-                
-            }
-            else{
-
-            }
+        for(int y = 0; y < height-1 ; y++){
+            serialize.push_back(&(matrix[l+y][ww-1-l]));
         }
+        for(int x = 0; x < width-1 ; x++){
+            serialize.push_back(&(matrix[hh-1-l][ww-1-l-x]));
+        }
+        for(int y = 0; y < height-1 ; y++){
+            serialize.push_back(&(matrix[hh-1-l-y][l]));
+        }
+        width -= 2;
+        height -= 2;
+        shift(serialize, rotate, -1);
     }
 
 }
 
+
+// Just a brouillon to visualize the problem since I code in nano and not using GUI desktop environnement :)
+// CLI >> all (but not for web tho)
 /*
     1 2 3 4 5
     1 2 3 4 5
@@ -54,14 +102,24 @@ void matrixRotation(vector<vector<int>> matrix, int rotate) {
 */
 
 
+void desc(vector <vector <int>> & V){ // displaying the matrix i used alphabetical translation for displaying cause number with more than 1 digit will make the visualizing dirty :(
+    for(auto&x: V){
+        for(auto&i: x)cout << char(i+97-1) << " ";
+        cout <<endl;
+    }
+}
+
 int main(){
     vector <vector <int>> V({
-        {1,2,3},
-        {4,5,6},
+        {1,2,3,4,5},
+        {6,7,8,9,10},
+        {11,12,13,14,15},
+        {16,17,18,19,20}
     });
-    int rotate = 1;
+    int rotate = 3;
+    desc(V);cout<<"----X----"<<endl;
     matrixRotation(V, rotate);
-
+    desc(V);cout<<"----X----"<<endl;
     return 0;
 }
 
