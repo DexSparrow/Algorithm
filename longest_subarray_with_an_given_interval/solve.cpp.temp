@@ -1,0 +1,91 @@
+#include <iostream>
+#include <algorithm>
+#include <bits/stdc++.h>
+
+using namespace std;
+
+
+/*
+    Explanation:
+        Given that we have an array such as : [1,4,2,3]
+        We want to pick an subarray from this array that meet our requirements
+        Example: our requirements is that all element of the subarray should have neighbour which the distance between it and its neighbour is <= 1
+        example: [1,2,3] "1 and 2 have distance 1", "2 and 3 have distance 1"
+        So in the array we will pick all subarray that match that , without altering the order
+        in our given eample:[1,4,3,2]
+        we can pick [1,3,2] or [4,3,2] they are correct because the distance between the element inside them is <= 1
+        And among these possibilty we have to choose the length of the longest subarray
+        That's the statement of the problem let's solve it now
+
+        FOr that I choose the method of sniper and it's copilot.
+        We should know that we are picking from right to the left
+        So I begin by doing for loop through each item to catch an possibilty:
+        [1,2,3,4]
+         x------
+         .x-----
+         ..x----
+         After that I will use two variable for searching valid neighbour
+         The first variable is the last checkpoint which represent the last neighbour and the other one is the variable greater than the last neighbour which seek for new neighbour that is near the last one
+         when we seek an new neighbour the new neighbour become the last neighbour and we seek for another one(and we increment other variable counting the number of neighbour found)
+
+
+
+*/
+
+int dfs(vector <int> * p,int a,int score){
+    if(a>=p->size()){
+        return score;
+
+    }
+    int b = a+1;
+    int mx = score;
+    for(b ;b < p->size();b++){
+        if(abs((*p)[b] - (*p)[a])<2){
+            mx = max(mx,dfs(p,b,score+1));
+        }
+    }
+    return mx;
+}
+
+int solve(vector <int> V){
+    int mix = 0;
+    for(int i = 0;i < V.size();i++){
+        mix = max(mix,dfs(&V,i,0));
+    }
+    return mix+1;
+    
+    int res = 0;
+    int a,b,c,d;
+    a = b = 0;
+    int L = V.size();
+    int mx = 0;
+    while(a<L){
+        d = a;
+        b = a+1;
+        c = 0;
+        while(b<L){
+            if(abs(V[d]-V[b])<2){
+                cout << V[d]<<" "<<V[b]<<" ";
+                d = b;
+                c++;
+            }
+            b++;
+        }
+        cout<<endl;
+        mx = max(mx,c);
+        a++;
+    }
+    res = mx;
+    return res?res+1:0;
+}
+
+int main(){
+    vector <int> V({3 ,5, 6, 3, 7, 8 , 2});
+    //vector <int> V({1,2,3,4});
+    int res = solve(V);
+    cout << res <<endl;
+    return 0;
+}
+
+
+
